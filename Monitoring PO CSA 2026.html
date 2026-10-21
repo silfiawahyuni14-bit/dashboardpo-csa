@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Monitoring PO Central Sumatera 2026</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        magenta: {
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            500: '#ec4899',
+                            600: '#db2777',
+                            700: '#be185d',
+                            900: '#831843',
+                        },
+                        brandOrange: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            900: '#7c2d12',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js DataLabels Plugin CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <!-- html2canvas CDN untuk Export Gambar -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 font-sans text-slate-100 min-h-screen">
+
+    <!-- Header Navigation -->
+    <nav class="bg-gradient-to-r from-magenta-700 via-magenta-600 to-brandOrange-600 text-white px-4 md:px-6 py-4 shadow-lg flex justify-between items-center border-b border-white/10">
+        <div class="flex items-center space-x-3">
+            <div class="p-2 bg-white/10 rounded-lg backdrop-blur-md">
+                <i class="fa-solid fa-chart-column text-white text-xl md:text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-base md:text-xl font-bold tracking-wide">Dashboard Monitoring PO Central Sumatera 2026</h1>
+                <p class="text-xs text-white/80">3ID & IM3 Sales Performance</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3 text-sm">
+            <!-- Tombol Download Gambar -->
+            <button onclick="downloadSummaryImage()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-3 py-2 rounded-lg flex items-center gap-2 transition shadow-sm text-xs md:text-sm border border-emerald-400/30">
+                <i class="fa-solid fa-camera"></i> Download Gambar
+            </button>
+
+            <a href="https://o365indosat-my.sharepoint.com/:x:/g/personal/2304007190_ioh_co_id/IQBoDtAgFcvuSJkEm_gOyIAwAWHuHJYEnzyhJhP_I8pk75A?e=0qCk8f" 
+               target="_blank" 
+               class="bg-white/20 hover:bg-white/30 text-white font-medium px-3 py-2 rounded-lg flex items-center gap-2 transition backdrop-blur-md border border-white/20 shadow-sm text-xs md:text-sm">
+                <i class="fa-solid fa-file-excel"></i> File Excel
+            </a>
+
+            <!-- FILTER TANGGAL REPORT -->
+            <div class="bg-black/40 text-white border border-white/30 px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs font-medium backdrop-blur-md shadow-inner">
+                <i class="fa-regular fa-calendar-check text-brandOrange-400"></i>
+                <span class="text-white/80 hidden md:inline font-semibold">Tanggal:</span>
+                <select id="filterDate" onchange="updateDashboard()" class="bg-transparent text-white font-extrabold outline-none cursor-pointer text-sm">
+                </select>
+            </div>
+
+            <button onclick="resetFilters()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-lg border border-slate-700 transition text-xs md:text-sm">
+                <i class="fa-solid fa-rotate-left mr-1"></i> Reset
+            </button>
+        </div>
+    </nav>
+
+    <div class="p-4 md:p-6 max-w-[1600px] mx-auto space-y-6">
+
+        <!-- Filter Panel -->
+        <div class="bg-slate-800/80 backdrop-blur-md p-4 md:p-5 rounded-2xl shadow-xl border border-slate-700/60 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Brand Filter</label>
+                <select id="filterBrand" onchange="updateDashboard()" class="w-full bg-slate-900 border border-slate-700 text-slate-200 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-magenta-500 outline-none">
+                    <option value="ALL">Semua Brand (3ID & IM3)</option>
+                    <option value="3ID">3ID Only</option>
+                    <option value="IM3">IM3 Only</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Branch (Cabang)</label>
+                <select id="filterBranch" onchange="updateDashboard()" class="w-full bg-slate-900 border border-slate-700 text-slate-200 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brandOrange-500 outline-none">
+                    <option value="ALL">Semua Cabang</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Cari Partner</label>
+                <input type="text" id="filterSearch" onkeyup="updateDashboard()" placeholder="Ketik nama partner..." class="w-full bg-slate-900 border border-slate-700 text-slate-200 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brandOrange-500 outline-none placeholder-slate-500">
+            </div>
+        </div>
+
+        <!-- KONTAINER AREA EKSPOR (KPI Cards + Tabel Sahaja) -->
+        <div id="exportArea" class="space-y-6 p-2 bg-slate-900 rounded-2xl">
+            
+            <!-- KPI Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-slate-800/80 p-5 rounded-2xl shadow-lg border border-slate-700/60 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-2 h-full bg-slate-600"></div>
+                    <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Volume SO</div>
+                    <div id="kpiTotalSO" class="text-3xl font-extrabold text-white mt-2">0</div>
+                    <div class="text-xs text-slate-400 mt-2"><span id="kpiNotPaidSO" class="text-magenta-500 font-bold">0</span> Not Paid | <span id="kpiPaidSO" class="text-brandOrange-500 font-bold">0</span> Paid</div>
+                </div>
+
+                <div class="bg-slate-800/80 p-5 rounded-2xl shadow-lg border border-slate-700/60 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-magenta-500 to-brandOrange-500"></div>
+                    <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Nominal PO</div>
+                    <div id="kpiTotalAmount" class="text-2xl font-extrabold text-white mt-2">Rp 0</div>
+                    <div class="text-xs text-slate-400 mt-2">Nilai akumulasi order</div>
+                </div>
+
+                <div class="bg-slate-800/80 p-5 rounded-2xl shadow-lg border border-magenta-500/30 relative overflow-hidden group bg-gradient-to-br from-magenta-900/20 to-transparent">
+                    <div class="absolute top-0 right-0 w-2 h-full bg-magenta-500"></div>
+                    <div class="text-xs font-bold text-magenta-400 uppercase tracking-wider">Outstanding (Not Paid)</div>
+                    <div id="kpiNotPaidAmt" class="text-2xl font-extrabold text-magenta-500 mt-2">Rp 0</div>
+                    <div class="text-xs text-magenta-400/80 mt-2 font-medium" id="kpiNotPaidPct">0% dari total nominal</div>
+                </div>
+
+                <div class="bg-slate-800/80 p-5 rounded-2xl shadow-lg border border-brandOrange-500/30 relative overflow-hidden group bg-gradient-to-br from-brandOrange-900/20 to-transparent">
+                    <div class="absolute top-0 right-0 w-2 h-full bg-brandOrange-500"></div>
+                    <div class="text-xs font-bold text-brandOrange-400 uppercase tracking-wider">Lunas (Paid)</div>
+                    <div id="kpiPaidAmt" class="text-2xl font-extrabold text-brandOrange-500 mt-2">Rp 0</div>
+                    <div class="text-xs text-brandOrange-400/80 mt-2 font-medium" id="kpiPaidPct">0% dari total nominal</div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="bg-slate-800/80 rounded-2xl shadow-lg border border-slate-700/60 overflow-hidden">
+                <div class="p-4 md:p-5 border-b border-slate-700 flex justify-between items-center bg-slate-800">
+                    <div class="flex items-center gap-3">
+                        <h3 class="text-base font-bold text-slate-100">Rincian Partner & Transaksi</h3>
+                        <a href="https://o365indosat-my.sharepoint.com/:x:/g/personal/2304007190_ioh_co_id/IQBoDtAgFcvuSJkEm_gOyIAwAWHuHJYEnzyhJhP_I8pk75A?e=0qCk8f" 
+                           target="_blank" 
+                           class="text-xs font-semibold text-brandOrange-400 hover:text-brandOrange-300 underline flex items-center gap-1 transition">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> File Excel
+                        </a>
+                    </div>
+                    <span id="recordCount" class="text-xs font-bold bg-magenta-500/20 text-magenta-300 border border-magenta-500/30 px-3 py-1 rounded-full">0 Data</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm text-slate-300 whitespace-nowrap">
+                        <thead>
+                            <tr class="bg-slate-900 text-slate-400 uppercase text-xs border-b border-slate-700">
+                                <th class="py-3.5 px-4 border-r border-slate-800">Brand</th>
+                                <th class="py-3.5 px-4 border-r border-slate-800">Partner Name</th>
+                                <th class="py-3.5 px-4 border-r border-slate-800">Type</th>
+                                <th class="py-3.5 px-4 text-center bg-magenta-950/40 text-magenta-300 border-r border-slate-800">Not Paid (#SO)</th>
+                                <th class="py-3.5 px-4 text-right bg-magenta-950/40 text-magenta-300 border-r border-slate-800">Not Paid Amount</th>
+                                <th class="py-3.5 px-4 text-center bg-brandOrange-950/40 text-brandOrange-300 border-r border-slate-800">Paid (#SO)</th>
+                                <th class="py-3.5 px-4 text-right bg-brandOrange-950/40 text-brandOrange-300">Paid Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="divide-y divide-slate-700/60">
+                        </tbody>
+                        <!-- GRAND TOTAL FOOTER -->
+                        <tfoot class="bg-slate-900 border-t-2 border-magenta-500 font-extrabold text-slate-100 uppercase text-xs">
+                            <tr>
+                                <td colspan="3" class="py-4 px-4 text-right border-r border-slate-800 tracking-wider">
+                                    <span class="bg-magenta-500/20 text-magenta-300 border border-magenta-500/40 px-3 py-1 rounded-lg">
+                                        <i class="fa-solid fa-calculator mr-1"></i> Grand Total
+                                    </span>
+                                </td>
+                                <td id="footNP_SO" class="py-4 px-4 text-center text-magenta-400 bg-magenta-950/40 border-r border-slate-800 text-sm">0</td>
+                                <td id="footNP_Amt" class="py-4 px-4 text-right text-magenta-400 bg-magenta-950/40 border-r border-slate-800 text-sm">Rp 0</td>
+                                <td id="footP_SO" class="py-4 px-4 text-center text-brandOrange-400 bg-brandOrange-950/40 border-r border-slate-800 text-sm">0</td>
+                                <td id="footP_Amt" class="py-4 px-4 text-right text-brandOrange-400 bg-brandOrange-950/40 text-sm">Rp 0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TWO CHARTS SECTION -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Diagram 1: Value Not Paid Vs Paid - MDI -->
+            <div class="bg-slate-800/80 p-5 rounded-2xl shadow-lg border border-slate-700/60">
+                <h3 class="text-base font-bold text-slate-100 mb-4 flex items-center justify-between">
+                    <span class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-indigo-500"></span>
+                        Value Not Paid Vs Paid - MDI
+                    </span>
+                    <span class="text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2.5 py-0.5 rounded-full">MDI Only</span>
+                </h3>
+                <div class="h-80 w-full">
+                    <canvas id="mdiChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Diagram 2: Value Not Paid Vs Paid - SDP -->
+            <div class="bg-slate-800/80 p-5 rounded-2xl shadow-lg border border-slate-700/60">
+                <h3 class="text-base font-bold text-slate-100 mb-4 flex items-center justify-between">
+                    <span class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                        Value Not Paid Vs Paid - SDP
+                    </span>
+                    <span class="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">SDP Only</span>
+                </h3>
+                <div class="h-80 w-full">
+                    <canvas id="sdpChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Register DataLabels Plugin
+        Chart.register(ChartDataLabels);
+
+        // DATA MULTI-TANGGAL (AKURASI PERSIS DENGAN SCREENSHOT UNTUK 21 OCT 2026)
+        const allData = {
+            "21 Oct 2026": [
+                // === 3ID (39 Rows) ===
+                {brand: "3ID", branch: "BATAM", partner: "KIOSK AGUS BINTAN", type: "SDP", np_so: 0, np_amt: 0, p_so: 2, p_amt: 985000},
+                {brand: "3ID", branch: "BATAM", partner: "KIOSK AGUS TANJUNG PINANG", type: "SDP", np_so: 0, np_amt: 0, p_so: 1, p_amt: 197000},
+                {brand: "3ID", branch: "BATAM", partner: "KIOSK M ALFANI", type: "SDP", np_so: 1, np_amt: 2955000, p_so: 3, p_amt: 8865000},
+                {brand: "3ID", branch: "BATAM", partner: "PT TRIMINDO JAYA MANDIRI", type: "MDI", np_so: 4, np_amt: 378240000, p_so: 29, p_amt: 2447200000},
+                {brand: "3ID", branch: "DUMAI", partner: "KIOSK CV ALMANAR STORE", type: "SDP", np_so: 4, np_amt: 6895000, p_so: 27, p_amt: 72700000},
+                {brand: "3ID", branch: "DUMAI", partner: "KIOSK CV RIAU INFINITY JAYA SIAK WEST KANDIS", type: "SDP", np_so: 0, np_amt: 0, p_so: 1, p_amt: 1970000},
+                {brand: "3ID", branch: "DUMAI", partner: "KIOSK HENDI", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 115138000},
+                {brand: "3ID", branch: "DUMAI", partner: "PT BANGUN HARTA MANDIRI", type: "MDI", np_so: 1, np_amt: 9850000, p_so: 57, p_amt: 766525000},
+                {brand: "3ID", branch: "DUMAI", partner: "KIOSK CV RIAU INFINITY JAYA SIAK EAST TEBING TINGGI", type: "SDP", np_so: 0, np_amt: 0, p_so: 5, p_amt: 51500000},
+                {brand: "3ID", branch: "KAMPAR", partner: "KIOSK ISRA MIRDA", type: "SDP", np_so: 0, np_amt: 0, p_so: 5, p_amt: 96856400},
+                {brand: "3ID", branch: "KAMPAR", partner: "KIOSK SINDI", type: "SDP", np_so: 0, np_amt: 0, p_so: 3, p_amt: 6402500},
+                {brand: "3ID", branch: "KAMPAR", partner: "KIOSK YUSTI RANDA WIJAYANTO", type: "SDP", np_so: 0, np_amt: 0, p_so: 2, p_amt: 5910000},
+                {brand: "3ID", branch: "KAMPAR", partner: "PT BANGUN HARTA MANDIRI", type: "MDI", np_so: 6, np_amt: 420595000, p_so: 48, p_amt: 1292625000},
+                {brand: "3ID", branch: "PEKANBARU", partner: "KIOSK BATIPUH HILIR", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 45832500},
+                {brand: "3ID", branch: "PEKANBARU", partner: "PT ULTIMA MULTIMEDIA JAYA", type: "MDI", np_so: 4, np_amt: 373315000, p_so: 53, p_amt: 6545995000},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK AHMAD SYUKRON TEBO ILIR", type: "SDP", np_so: 0, np_amt: 0, p_so: 6, p_amt: 10250768},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK AHMAD SYUKRON TEBO RIMBO ULU", type: "SDP", np_so: 2, np_amt: 6895000, p_so: 19, p_amt: 71041648},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK ARIYANTONI BATANG HARI MERSAM", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 23467730},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK RIO ARIANTO", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 7486000},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK YULIANTO", type: "SDP", np_so: 0, np_amt: 0, p_so: 9, p_amt: 24640000},
+                {brand: "3ID", branch: "BATANGHARI", partner: "PT ULTIMA MULTIMEDIA JAYA", type: "MDI", np_so: 4, np_amt: 485605000, p_so: 28, p_amt: 4000005000},
+                {brand: "3ID", branch: "BUNGO", partner: "KIOSK AHMAD SYUKRON MERANGIN TABIR SELATAN", type: "SDP", np_so: 1, np_amt: 985000, p_so: 10, p_amt: 32337058},
+                {brand: "3ID", branch: "BUNGO", partner: "KIOSK ARIYANTONI MERANGIN PAMENANG", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 20937160},
+                {brand: "3ID", branch: "BUNGO", partner: "KIOSK ARIYANTONI SAROLANGUN SINGKUT", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 12246730},
+                {brand: "3ID", branch: "BUNGO", partner: "PT INDOCEN SYSTEM TELECOMUNICATION", type: "MDI", np_so: 5, np_amt: 251175000, p_so: 64, p_amt: 1214865000},
+                {brand: "3ID", branch: "JAMBI", partner: "KIOSK ARDIANSYAH", type: "SDP", np_so: 0, np_amt: 0, p_so: 1, p_amt: 4925000},
+                {brand: "3ID", branch: "JAMBI", partner: "PT ULTIMA MULTIMEDIA JAYA", type: "MDI", np_so: 3, np_amt: 613655000, p_so: 32, p_amt: 7581040000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "KIOSK CV ADELIO CELULER", type: "SDP", np_so: 2, np_amt: 4925000, p_so: 23, p_amt: 51178000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "KIOSK CV GADING PERKASA SEJAHTERA", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 20685000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "KIOSK M. RIZAL", type: "SDP", np_so: 0, np_amt: 0, p_so: 6, p_amt: 27580000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "KIOSK NANDA SAPUTRA", type: "SDP", np_so: 1, np_amt: 689500, p_so: 5, p_amt: 46974475},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "MITRA TELCO INDO CELLULAR", type: "MDI", np_so: 7, np_amt: 178285000, p_so: 51, p_amt: 1586109750},
+                {brand: "3ID", branch: "PADANG", partner: "KIOSK AKMAL", type: "SDP", np_so: 1, np_amt: 2955000, p_so: 14, p_amt: 45310000},
+                {brand: "3ID", branch: "PADANG", partner: "KIOSK DARWANIS", type: "SDP", np_so: 0, np_amt: 0, p_so: 19, p_amt: 39400000},
+                {brand: "3ID", branch: "PADANG", partner: "KIOSK SAHRU ARMADI", type: "SDP", np_so: 2, np_amt: 7880000, p_so: 20, p_amt: 93575000},
+                {brand: "3ID", branch: "PADANG", partner: "PT ULTIMA MULTIMEDIA JAYA", type: "MDI", np_so: 2, np_amt: 163017500, p_so: 58, p_amt: 4066935000},
+                {brand: "3ID", branch: "SOLOK", partner: "KIOSK ALHUSNI MUABARAK", type: "SDP", np_so: 2, np_amt: 18345625, p_so: 4, p_amt: 11235000},
+                {brand: "3ID", branch: "SOLOK", partner: "KIOSK FRENDY RICARDO", type: "SDP", np_so: 2, np_amt: 1970000, p_so: 10, p_amt: 24760000},
+                {brand: "3ID", branch: "SOLOK", partner: "KIOSK SYALVIKA JHONI", type: "SDP", np_so: 0, np_amt: 0, p_so: 4, p_amt: 15760000},
+                {brand: "3ID", branch: "SOLOK", partner: "MITRA TELCO INDO CELLULAR", type: "MDI", np_so: 10, np_amt: 256100000, p_so: 45, p_amt: 1040320000},
+
+                // === IM3 (40 Rows) ===
+                {brand: "IM3", branch: "BATAM", partner: "SDP AGUS BINTAN", type: "SDP", np_so: 3, np_amt: 4462500, p_so: 2, p_amt: 1477500},
+                {brand: "IM3", branch: "BATAM", partner: "SDP AGUS TANJUNG PINANG", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 7, p_amt: 4787100},
+                {brand: "IM3", branch: "BATAM", partner: "SDP M ALFANI", type: "SDP", np_so: 2, np_amt: 6925000, p_so: 5, p_amt: 24625000},
+                {brand: "IM3", branch: "BATAM", partner: "TRIMINDO JAYA MANDIRI, PT", type: "MDI", np_so: 55, np_amt: 905635000, p_so: 33, p_amt: 812695000},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP AHMAD SYUKRON TEBO ILIR", type: "SDP", np_so: 0, np_amt: 0, p_so: 14, p_amt: 66115000},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP AHMAD SYUKRON TEBO RIMBO ULU", type: "SDP", np_so: 0, np_amt: 0, p_so: 11, p_amt: 17032845},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP ARIYANTONI BATANG HARI MERSAM", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 7, p_amt: 38338050},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP RIO ARIANTO", type: "SDP", np_so: 1, np_amt: 985000, p_so: 17, p_amt: 18154000},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP YULIANTO", type: "SDP", np_so: 0, np_amt: 0, p_so: 11, p_amt: 37475000},
+                {brand: "IM3", branch: "BATANGHARI", partner: "ULTIMA MULTIMEDIA JAYA, PT", type: "MDI", np_so: 14, np_amt: 320770000, p_so: 28, p_amt: 2178015000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "MITRA TELCO INDO CELLULAR", type: "MDI", np_so: 40, np_amt: 750470000, p_so: 44, p_amt: 528255000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "SDP CV ADELIO CELULER", type: "SDP", np_so: 1, np_amt: 2462500, p_so: 18, p_amt: 43707000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "SDP CV GADING PERKASA SEJAHTERA", type: "SDP", np_so: 1, np_amt: 1000000, p_so: 3, p_amt: 3705000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "SDP M. RIZAL", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 4, p_amt: 10835000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "SDP NANDA SAPUTRA", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 5678750},
+                {brand: "IM3", branch: "BUNGO", partner: "INDOCEN SYSTEM TELECOMUNICATION, PT", type: "MDI", np_so: 18, np_amt: 219725000, p_so: 50, p_amt: 1347489000},
+                {brand: "IM3", branch: "BUNGO", partner: "SDP AHMAD SYUKRON MERANGIN TABIR SELATAN", type: "SDP", np_so: 3, np_amt: 15760000, p_so: 16, p_amt: 61737470},
+                {brand: "IM3", branch: "BUNGO", partner: "SDP ARIYANTONI MERANGIN PAMENANG", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 11, p_amt: 33943550},
+                {brand: "IM3", branch: "BUNGO", partner: "SDP ARIYANTONI SAROLANGUN SINGKUT", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 11, p_amt: 30873010},
+                {brand: "IM3", branch: "DUMAI", partner: "BANGUN HARTA MANDIRI, PT", type: "MDI", np_so: 14, np_amt: 320250000, p_so: 48, p_amt: 428500000},
+                {brand: "IM3", branch: "DUMAI", partner: "SDP ALMANAR STORE", type: "SDP", np_so: 3, np_amt: 3955000, p_so: 3, p_amt: 2955000},
+                {brand: "IM3", branch: "DUMAI", partner: "SDP CV RIAU INFINITY JAYA SIAK EAST TEBING TINGGI", type: "SDP", np_so: 0, np_amt: 0, p_so: 3, p_amt: 3375000},
+                {brand: "IM3", branch: "DUMAI", partner: "SDP CV RIAU INFINITY JAYA SIAK WEST KANDIS", type: "SDP", np_so: 0, np_amt: 0, p_so: 6, p_amt: 71950000},
+                {brand: "IM3", branch: "DUMAI", partner: "SDP HENDI", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 32550000},
+                {brand: "IM3", branch: "JAMBI", partner: "SDP ARDIANSYAH", type: "SDP", np_so: 0, np_amt: 0, p_so: 3, p_amt: 10675000},
+                {brand: "IM3", branch: "JAMBI", partner: "ULTIMA MULTIMEDIA JAYA, PT", type: "MDI", np_so: 20, np_amt: 1213795000, p_so: 37, p_amt: 4693435000},
+                {brand: "IM3", branch: "KAMPAR", partner: "BANGUN HARTA MANDIRI, PT", type: "MDI", np_so: 12, np_amt: 155550000, p_so: 48, p_amt: 781885000},
+                {brand: "IM3", branch: "KAMPAR", partner: "SDP ISRA MIRDA", type: "SDP", np_so: 1, np_amt: 12425775, p_so: 8, p_amt: 33840490},
+                {brand: "IM3", branch: "KAMPAR", partner: "SDP SINDI", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 8, p_amt: 71045000},
+                {brand: "IM3", branch: "KAMPAR", partner: "SDP YUSTI RANDA WIJAYANTO", type: "SDP", np_so: 2, np_amt: 6925000, p_so: 11, p_amt: 73200000},
+                {brand: "IM3", branch: "PADANG", partner: "SDP AKMAL", type: "SDP", np_so: 3, np_amt: 8880000, p_so: 16, p_amt: 55675000},
+                {brand: "IM3", branch: "PADANG", partner: "SDP DARWANIS", type: "SDP", np_so: 1, np_amt: 1000000, p_so: 11, p_amt: 14165000},
+                {brand: "IM3", branch: "PADANG", partner: "SDP SAHRU ARMADI", type: "SDP", np_so: 4, np_amt: 11820000, p_so: 13, p_amt: 35380000},
+                {brand: "IM3", branch: "PADANG", partner: "ULTIMA MULTIMEDIA JAYA, PT", type: "MDI", np_so: 29, np_amt: 852615000, p_so: 32, p_amt: 852050000},
+                {brand: "IM3", branch: "PEKANBARU", partner: "SDP BATIPUH HILIR", type: "SDP", np_so: 0, np_amt: 0, p_so: 10, p_amt: 79087500},
+                {brand: "IM3", branch: "PEKANBARU", partner: "ULTIMA MULTIMEDIA JAYA, PT", type: "MDI", np_so: 46, np_amt: 1425995000, p_so: 54, p_amt: 3211730000},
+                {brand: "IM3", branch: "SOLOK", partner: "MITRA TELCO INDO CELLULAR", type: "MDI", np_so: 40, np_amt: 599415000, p_so: 35, p_amt: 761910000},
+                {brand: "IM3", branch: "SOLOK", partner: "SDP ALHUSNI MUABARAK", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 32565625},
+                {brand: "IM3", branch: "SOLOK", partner: "SDP FRENDY RICARDO", type: "SDP", np_so: 5, np_amt: 10850000, p_so: 13, p_amt: 33110000},
+                {brand: "IM3", branch: "SOLOK", partner: "SDP SYALVIKA JHONI", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 64470000}
+            ],
+            "20 Oct 2026": [
+                {brand: "3ID", branch: "BATAM", partner: "KIOSK AGUS BINTAN", type: "SDP", np_so: 0, np_amt: 0, p_so: 2, p_amt: 985000},
+                {brand: "3ID", branch: "BATAM", partner: "KIOSK AGUS TANJUNG PINANG", type: "SDP", np_so: 0, np_amt: 0, p_so: 1, p_amt: 197000},
+                {brand: "3ID", branch: "BATAM", partner: "KIOSK M ALFANI", type: "SDP", np_so: 2, np_amt: 5910000, p_so: 2, p_amt: 5910000},
+                {brand: "3ID", branch: "BATAM", partner: "PT TRIMINDO JAYA MANDIRI", type: "MDI", np_so: 11, np_amt: 610700000, p_so: 29, p_amt: 2447200000},
+                {brand: "3ID", branch: "DUMAI", partner: "KIOSK CV ALMANAR STORE", type: "SDP", np_so: 2, np_amt: 1970000, p_so: 26, p_amt: 68760000},
+                {brand: "3ID", branch: "DUMAI", partner: "KIOSK HENDI", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 115138000},
+                {brand: "3ID", branch: "DUMAI", partner: "PT BANGUN HARTA MANDIRI", type: "MDI", np_so: 0, np_amt: 0, p_so: 50, p_amt: 687725000},
+                {brand: "3ID", branch: "DUMAI", partner: "KIOSK CV RIAU INFINITY JAYA SIAK EAST TEBING TINGGI", type: "SDP", np_so: 0, np_amt: 0, p_so: 4, p_amt: 36725000},
+                {brand: "3ID", branch: "KAMPAR", partner: "KIOSK ISRA MIRDA", type: "SDP", np_so: 0, np_amt: 0, p_so: 4, p_amt: 84430625},
+                {brand: "3ID", branch: "KAMPAR", partner: "KIOSK SINDI", type: "SDP", np_so: 0, np_amt: 0, p_so: 3, p_amt: 6402500},
+                {brand: "3ID", branch: "KAMPAR", partner: "KIOSK YUSTI RANDA WIJAYANTO", type: "SDP", np_so: 0, np_amt: 0, p_so: 2, p_amt: 5910000},
+                {brand: "3ID", branch: "KAMPAR", partner: "PT BANGUN HARTA MANDIRI", type: "MDI", np_so: 1, np_amt: 68950000, p_so: 38, p_amt: 1147830000},
+                {brand: "3ID", branch: "PEKANBARU", partner: "KIOSK BATIPUH HILIR", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 43370000},
+                {brand: "3ID", branch: "PEKANBARU", partner: "PT ULTIMA MULTIMEDIA JAYA", type: "MDI", np_so: 6, np_amt: 186165000, p_so: 42, p_amt: 6211485000},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK AHMAD SYUKRON TEBO ILIR", type: "SDP", np_so: 0, np_amt: 0, p_so: 4, p_amt: 22655000},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK AHMAD SYUKRON TEBO RIMBO ULU", type: "SDP", np_so: 1, np_amt: 1970000, p_so: 18, p_amt: 47172910},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK ARIYANTONI BATANG HARI MERSAM", type: "SDP", np_so: 0, np_amt: 0, p_so: 6, p_amt: 31453125},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK RIO ARIANTO", type: "SDP", np_so: 0, np_amt: 0, p_so: 6, p_amt: 7387500},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK YULIANTO", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 33490000},
+                {brand: "3ID", branch: "BATANGHARI", partner: "PT ULTIMA MULTIMEDIA JAYA", type: "MDI", np_so: 4, np_amt: 115245000, p_so: 28, p_amt: 3012115000},
+                {brand: "3ID", branch: "BUNGO", partner: "KIOSK AHMAD SYUKRON MERANGIN TABIR SELATAN", type: "SDP", np_so: 1, np_amt: 985000, p_so: 8, p_amt: 20982470},
+                {brand: "3ID", branch: "BUNGO", partner: "KIOSK ARIYANTONI MERANGIN PAMENANG", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 21927085},
+                {brand: "3ID", branch: "BUNGO", partner: "KIOSK ARIYANTONI SAROLANGUN SINGKUT", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 20407160},
+                {brand: "3ID", branch: "BUNGO", partner: "PT INDOCEN SYSTEM TELECOMUNICATION", type: "MDI", np_so: 2, np_amt: 46295000, p_so: 62, p_amt: 1687555000},
+                {brand: "3ID", branch: "JAMBI", partner: "KIOSK ARDIANSYAH", type: "SDP", np_so: 0, np_amt: 0, p_so: 1, p_amt: 4925000},
+                {brand: "3ID", branch: "JAMBI", partner: "PT ULTIMA MULTIMEDIA JAYA", type: "MDI", np_so: 4, np_amt: 507275000, p_so: 28, p_amt: 4216890000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "KIOSK CV ADELIO CELULER", type: "SDP", np_so: 1, np_amt: 1970000, p_so: 21, p_amt: 53330000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "KIOSK CV GADING PERKASA SEJAHTERA", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 39400000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "KIOSK M. RIZAL", type: "SDP", np_so: 0, np_amt: 0, p_so: 6, p_amt: 16745000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "KIOSK NANDA SAPUTRA", type: "SDP", np_so: 0, np_amt: 0, p_so: 5, p_amt: 36782000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "MITRA TELCO INDO CELLULAR", type: "MDI", np_so: 2, np_amt: 22655000, p_so: 51, p_amt: 728035000},
+                {brand: "3ID", branch: "PADANG", partner: "KIOSK AKMAL", type: "SDP", np_so: 2, np_amt: 5910000, p_so: 12, p_amt: 44325000},
+                {brand: "3ID", branch: "PADANG", partner: "KIOSK DARWANIS", type: "SDP", np_so: 1, np_amt: 1970000, p_so: 16, p_amt: 49250000},
+                {brand: "3ID", branch: "PADANG", partner: "KIOSK SAHRU ARMADI", type: "SDP", np_so: 3, np_amt: 11820000, p_so: 19, p_amt: 48265000},
+                {brand: "3ID", branch: "PADANG", partner: "PT ULTIMA MULTIMEDIA JAYA", type: "MDI", np_so: 4, np_amt: 262995000, p_so: 49, p_amt: 1114900000},
+                {brand: "3ID", branch: "SOLOK", partner: "KIOSK ALHUSNI MUABARAK", type: "SDP", np_so: 2, np_amt: 18345625, p_so: 3, p_amt: 6280000},
+                {brand: "3ID", branch: "SOLOK", partner: "KIOSK FRENDY RICARDO", type: "SDP", np_so: 3, np_amt: 1970000, p_so: 9, p_amt: 19700000},
+                {brand: "3ID", branch: "SOLOK", partner: "KIOSK SYALVIKA JHONI", type: "SDP", np_so: 0, np_amt: 0, p_so: 4, p_amt: 30535000},
+                {brand: "3ID", branch: "SOLOK", partner: "MITRA TELCO INDO CELLULAR", type: "MDI", np_so: 7, np_amt: 124110000, p_so: 40, p_amt: 876160000},
+
+                // === IM3 ===
+                {brand: "IM3", branch: "BATAM", partner: "SDP AGUS BINTAN", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 3, p_amt: 3447500},
+                {brand: "IM3", branch: "BATAM", partner: "SDP AGUS TANJUNG PINANG", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 6, p_amt: 3265500},
+                {brand: "IM3", branch: "BATAM", partner: "SDP M ALFANI", type: "SDP", np_so: 2, np_amt: 6925000, p_so: 5, p_amt: 24625000},
+                {brand: "IM3", branch: "BATAM", partner: "TRIMINDO JAYA MANDIRI, PT", type: "MDI", np_so: 50, np_amt: 785635000, p_so: 36, p_amt: 951395000},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP AHMAD SYUKRON TEBO ILIR", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 12, p_amt: 51340000},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP AHMAD SYUKRON TEBO RIMBO ULU", type: "SDP", np_so: 0, np_amt: 0, p_so: 11, p_amt: 18962910},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP ARIYANTONI BATANG HARI MERSAM", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 6, p_amt: 30453125},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP RIO ARIANTO", type: "SDP", np_so: 0, np_amt: 0, p_so: 15, p_amt: 16312500},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP YULIANTO", type: "SDP", np_so: 0, np_amt: 0, p_so: 9, p_amt: 28640000},
+                {brand: "IM3", branch: "BATANGHARI", partner: "ULTIMA MULTIMEDIA JAYA, PT", type: "MDI", np_so: 16, np_amt: 418670000, p_so: 27, p_amt: 2193250000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "MITRA TELCO INDO CELLULAR", type: "MDI", np_so: 28, np_amt: 489375000, p_so: 50, p_amt: 704040000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "SDP CV ADELIO CELULER", type: "SDP", np_so: 2, np_amt: 4137000, p_so: 16, p_amt: 39570000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "SDP CV GADING PERKASA SEJAHTERA", type: "SDP", np_so: 1, np_amt: 1000000, p_so: 2, p_amt: 1735000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "SDP M. RIZAL", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 4, p_amt: 9880000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "SDP NANDA SAPUTRA", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 6955000},
+                {brand: "IM3", branch: "BUNGO", partner: "INDOCEN SYSTEM TELECOMUNICATION, PT", type: "MDI", np_so: 17, np_amt: 126450000, p_so: 45, p_amt: 1165555000},
+                {brand: "IM3", branch: "BUNGO", partner: "SDP AHMAD SYUKRON MERANGIN TABIR SELATAN", type: "SDP", np_so: 4, np_amt: 17760000, p_so: 13, p_amt: 55797470},
+                {brand: "IM3", branch: "BUNGO", partner: "SDP ARIYANTONI MERANGIN PAMENANG", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 10, p_amt: 27897085},
+                {brand: "IM3", branch: "BUNGO", partner: "SDP ARIYANTONI SAROLANGUN SINGKUT", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 10, p_amt: 25377160},
+                {brand: "IM3", branch: "DUMAI", partner: "BANGUN HARTA MANDIRI, PT", type: "MDI", np_so: 14, np_amt: 320250000, p_so: 42, p_amt: 384625000},
+                {brand: "IM3", branch: "DUMAI", partner: "SDP ALMANAR STORE", type: "SDP", np_so: 1, np_amt: 1985000, p_so: 5, p_amt: 4925000},
+                {brand: "IM3", branch: "DUMAI", partner: "SDP CV RIAU INFINITY JAYA SIAK EAST TEBING TINGGI", type: "SDP", np_so: 0, np_amt: 0, p_so: 3, p_amt: 3375000},
+                {brand: "IM3", branch: "DUMAI", partner: "SDP CV RIAU INFINITY JAYA SIAK WEST KANDIS", type: "SDP", np_so: 0, np_amt: 0, p_so: 5, p_amt: 62100000},
+                {brand: "IM3", branch: "DUMAI", partner: "SDP HENDI", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 32550000},
+                {brand: "IM3", branch: "JAMBI", partner: "SDP ARDIANSYAH", type: "SDP", np_so: 0, np_amt: 0, p_so: 3, p_amt: 10675000},
+                {brand: "IM3", branch: "JAMBI", partner: "ULTIMA MULTIMEDIA JAYA, PT", type: "MDI", np_so: 21, np_amt: 1521115000, p_so: 37, p_amt: 4900460000},
+                {brand: "IM3", branch: "KAMPAR", partner: "BANGUN HARTA MANDIRI, PT", type: "MDI", np_so: 11, np_amt: 194950000, p_so: 38, p_amt: 582500000},
+                {brand: "IM3", branch: "KAMPAR", partner: "SDP ISRA MIRDA", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 30949740},
+                {brand: "IM3", branch: "KAMPAR", partner: "SDP SINDI", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 8, p_amt: 71567500},
+                {brand: "IM3", branch: "KAMPAR", partner: "SDP YUSTI RANDA WIJAYANTO", type: "SDP", np_so: 2, np_amt: 6925000, p_so: 10, p_amt: 70275000},
+                {brand: "IM3", branch: "PADANG", partner: "SDP AKMAL", type: "SDP", np_so: 3, np_amt: 5690000, p_so: 13, p_amt: 45150000},
+                {brand: "IM3", branch: "PADANG", partner: "SDP DARWANIS", type: "SDP", np_so: 2, np_amt: 1985000, p_so: 10, p_amt: 14775000},
+                {brand: "IM3", branch: "PADANG", partner: "SDP SAHRU ARMADI", type: "SDP", np_so: 4, np_amt: 12805000, p_so: 13, p_amt: 34395000},
+                {brand: "IM3", branch: "PADANG", partner: "ULTIMA MULTIMEDIA JAYA, PT", type: "MDI", np_so: 28, np_amt: 726535000, p_so: 28, p_amt: 581160000},
+                {brand: "IM3", branch: "PEKANBARU", partner: "SDP BATIPUH HILIR", type: "SDP", np_so: 0, np_amt: 0, p_so: 9, p_amt: 80565000},
+                {brand: "IM3", branch: "PEKANBARU", partner: "ULTIMA MULTIMEDIA JAYA, PT", type: "MDI", np_so: 51, np_amt: 1144675000, p_so: 43, p_amt: 3050280000},
+                {brand: "IM3", branch: "SOLOK", partner: "MITRA TELCO INDO CELLULAR", type: "MDI", np_so: 39, np_amt: 567885000, p_so: 30, p_amt: 644035000},
+                {brand: "IM3", branch: "SOLOK", partner: "SDP ALHUSNI MUABARAK", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 20205000},
+                {brand: "IM3", branch: "SOLOK", partner: "SDP FRENDY RICARDO", type: "SDP", np_so: 5, np_amt: 10850000, p_so: 13, p_amt: 33110000},
+                {brand: "IM3", branch: "SOLOK", partner: "SDP SYALVIKA JHONI", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 64470000}
+            ],
+            "19 Oct 2026": [
+                {brand: "3ID", branch: "BATAM", partner: "KIOSK AGUS BINTAN", type: "SDP", np_so: 0, np_amt: 0, p_so: 1, p_amt: 492500},
+                {brand: "3ID", branch: "BATAM", partner: "KIOSK AGUS TANJUNG PINANG", type: "SDP", np_so: 0, np_amt: 0, p_so: 1, p_amt: 197000},
+                {brand: "3ID", branch: "BATAM", partner: "KIOSK M ALFANI", type: "SDP", np_so: 2, np_amt: 5910000, p_so: 2, p_amt: 5910000},
+                {brand: "3ID", branch: "BATAM", partner: "PT TRIMINDO JAYA MANDIRI", type: "MDI", np_so: 7, np_amt: 232460000, p_so: 20, p_amt: 1966600000},
+                {brand: "3ID", branch: "DUMAI", partner: "KIOSK CV ALMANAR STORE", type: "SDP", np_so: 4, np_amt: 7880000, p_so: 24, p_amt: 62850000},
+                {brand: "3ID", branch: "DUMAI", partner: "KIOSK HENDI", type: "SDP", np_so: 1, np_amt: 4925000, p_so: 6, p_amt: 110213000},
+                {brand: "3ID", branch: "DUMAI", partner: "PT BANGUN HARTA MANDIRI", type: "MDI", np_so: 0, np_amt: 0, p_so: 50, p_amt: 687725000},
+                {brand: "3ID", branch: "DUMAI", partner: "KIOSK CV RIAU INFINITY JAYA SIAK EAST TEBING TINGGI", type: "SDP", np_so: 0, np_amt: 0, p_so: 4, p_amt: 36725000},
+                {brand: "3ID", branch: "KAMPAR", partner: "KIOSK ISRA MIRDA", type: "SDP", np_so: 0, np_amt: 0, p_so: 4, p_amt: 84430625},
+                {brand: "3ID", branch: "KAMPAR", partner: "KIOSK SINDI", type: "SDP", np_so: 0, np_amt: 0, p_so: 3, p_amt: 6402500},
+                {brand: "3ID", branch: "KAMPAR", partner: "KIOSK YUSTI RANDA WIJAYANTO", type: "SDP", np_so: 0, np_amt: 0, p_so: 2, p_amt: 5910000},
+                {brand: "3ID", branch: "KAMPAR", partner: "PT BANGUN HARTA MANDIRI", type: "MDI", np_so: 0, np_amt: 0, p_so: 39, p_amt: 1216780000},
+                {brand: "3ID", branch: "PEKANBARU", partner: "KIOSK BATIPUH HILIR", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 43370000},
+                {brand: "3ID", branch: "PEKANBARU", partner: "PT ULTIMA MULTIMEDIA JAYA", type: "MDI", np_so: 7, np_amt: 255115000, p_so: 41, p_amt: 6142535000},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK AHMAD SYUKRON TEBO ILIR", type: "SDP", np_so: 0, np_amt: 0, p_so: 4, p_amt: 22655000},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK AHMAD SYUKRON TEBO RIMBO ULU", type: "SDP", np_so: 2, np_amt: 6895000, p_so: 17, p_amt: 42247910},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK ARIYANTONI BATANG HARI MERSAM", type: "SDP", np_so: 0, np_amt: 0, p_so: 6, p_amt: 31453125},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK RIO ARIANTO", type: "SDP", np_so: 0, np_amt: 0, p_so: 6, p_amt: 7387500},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK YULIANTO", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 33490000},
+                {brand: "3ID", branch: "BATANGHARI", partner: "PT ULTIMA MULTIMEDIA JAYA", type: "MDI", np_so: 4, np_amt: 115245000, p_so: 28, p_amt: 3012115000},
+                {brand: "3ID", branch: "BUNGO", partner: "KIOSK AHMAD SYUKRON MERANGIN TABIR SELATAN", type: "SDP", np_so: 1, np_amt: 985000, p_so: 8, p_amt: 20982470},
+                {brand: "3ID", branch: "BUNGO", partner: "KIOSK ARIYANTONI MERANGIN PAMENANG", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 21927085},
+                {brand: "3ID", branch: "BUNGO", partner: "KIOSK ARIYANTONI SAROLANGUN SINGKUT", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 20407160},
+                {brand: "3ID", branch: "BUNGO", partner: "PT INDOCEN SYSTEM TELECOMUNICATION", type: "MDI", np_so: 3, np_amt: 115245000, p_so: 61, p_amt: 1618605000},
+                {brand: "3ID", branch: "JAMBI", partner: "KIOSK ARDIANSYAH", type: "SDP", np_so: 0, np_amt: 0, p_so: 1, p_amt: 4925000},
+                {brand: "3ID", branch: "JAMBI", partner: "PT ULTIMA MULTIMEDIA JAYA", type: "MDI", np_so: 4, np_amt: 507275000, p_so: 28, p_amt: 4216890000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "KIOSK CV ADELIO CELULER", type: "SDP", np_so: 1, np_amt: 1970000, p_so: 21, p_amt: 53330000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "KIOSK CV GADING PERKASA SEJAHTERA", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 39400000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "KIOSK M. RIZAL", type: "SDP", np_so: 0, np_amt: 0, p_so: 6, p_amt: 16745000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "KIOSK NANDA SAPUTRA", type: "SDP", np_so: 1, np_amt: 689500, p_so: 4, p_amt: 36092500},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "MITRA TELCO INDO CELLULAR", type: "MDI", np_so: 3, np_amt: 38415000, p_so: 50, p_amt: 712275000},
+                {brand: "3ID", branch: "PADANG", partner: "KIOSK AKMAL", type: "SDP", np_so: 2, np_amt: 5910000, p_so: 12, p_amt: 44325000},
+                {brand: "3ID", branch: "PADANG", partner: "KIOSK DARWANIS", type: "SDP", np_so: 1, np_amt: 1970000, p_so: 16, p_amt: 49250000},
+                {brand: "3ID", branch: "PADANG", partner: "KIOSK SAHRU ARMADI", type: "SDP", np_so: 4, np_amt: 13790000, p_so: 18, p_amt: 46295000},
+                {brand: "3ID", branch: "PADANG", partner: "PT ULTIMA MULTIMEDIA JAYA", type: "MDI", np_so: 5, np_amt: 331945000, p_so: 48, p_amt: 1045950000},
+                {brand: "3ID", branch: "SOLOK", partner: "KIOSK ALHUSNI MUABARAK", type: "SDP", np_so: 2, np_amt: 18345625, p_so: 3, p_amt: 6280000},
+                {brand: "3ID", branch: "SOLOK", partner: "KIOSK FRENDY RICARDO", type: "SDP", np_so: 4, np_amt: 3940000, p_so: 8, p_amt: 17730000},
+                {brand: "3ID", branch: "SOLOK", partner: "KIOSK SYALVIKA JHONI", type: "SDP", np_so: 0, np_amt: 0, p_so: 4, p_amt: 30535000},
+                {brand: "3ID", branch: "SOLOK", partner: "MITRA TELCO INDO CELLULAR", type: "MDI", np_so: 10, np_amt: 167450000, p_so: 37, p_amt: 832820000},
+
+                // === IM3 ===
+                {brand: "IM3", branch: "BATAM", partner: "SDP AGUS BINTAN", type: "SDP", np_so: 2, np_amt: 3970000, p_so: 2, p_amt: 1477500},
+                {brand: "IM3", branch: "BATAM", partner: "SDP AGUS TANJUNG PINANG", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 6, p_amt: 3265500},
+                {brand: "IM3", branch: "BATAM", partner: "SDP M ALFANI", type: "SDP", np_so: 3, np_amt: 11850000, p_so: 4, p_amt: 19700000},
+                {brand: "IM3", branch: "BATAM", partner: "TRIMINDO JAYA MANDIRI, PT", type: "MDI", np_so: 55, np_amt: 905635000, p_so: 31, p_amt: 831395000},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP AHMAD SYUKRON TEBO ILIR", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 12, p_amt: 51340000},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP AHMAD SYUKRON TEBO RIMBO ULU", type: "SDP", np_so: 1, np_amt: 1000000, p_so: 10, p_amt: 17962910},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP ARIYANTONI BATANG HARI MERSAM", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 6, p_amt: 30453125},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP RIO ARIANTO", type: "SDP", np_so: 0, np_amt: 0, p_so: 15, p_amt: 16312500},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP YULIANTO", type: "SDP", np_so: 0, np_amt: 0, p_so: 9, p_amt: 28640000},
+                {brand: "IM3", branch: "BATANGHARI", partner: "ULTIMA MULTIMEDIA JAYA, PT", type: "MDI", np_so: 17, np_amt: 458670000, p_so: 26, p_amt: 2153250000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "MITRA TELCO INDO CELLULAR", type: "MDI", np_so: 36, np_amt: 680125000, p_so: 42, p_amt: 513290000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "SDP CV ADELIO CELULER", type: "SDP", np_so: 2, np_amt: 4137000, p_so: 16, p_amt: 39570000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "SDP CV GADING PERKASA SEJAHTERA", type: "SDP", np_so: 1, np_amt: 1000000, p_so: 2, p_amt: 1735000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "SDP M. RIZAL", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 4, p_amt: 9880000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "SDP NANDA SAPUTRA", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 6955000},
+                {brand: "IM3", branch: "BUNGO", partner: "INDOCEN SYSTEM TELECOMUNICATION, PT", type: "MDI", np_so: 18, np_amt: 175700000, p_so: 44, p_amt: 1116305000},
+                {brand: "IM3", branch: "BUNGO", partner: "SDP AHMAD SYUKRON MERANGIN TABIR SELATAN", type: "SDP", np_so: 4, np_amt: 17760000, p_so: 13, p_amt: 55797470},
+                {brand: "IM3", branch: "BUNGO", partner: "SDP ARIYANTONI MERANGIN PAMENANG", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 10, p_amt: 27897085},
+                {brand: "IM3", branch: "BUNGO", partner: "SDP ARIYANTONI SAROLANGUN SINGKUT", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 10, p_amt: 25377160},
+                {brand: "IM3", branch: "DUMAI", partner: "BANGUN HARTA MANDIRI, PT", type: "MDI", np_so: 14, np_amt: 320250000, p_so: 42, p_amt: 384625000},
+                {brand: "IM3", branch: "DUMAI", partner: "SDP ALMANAR STORE", type: "SDP", np_so: 3, np_amt: 3955000, p_so: 3, p_amt: 2955000},
+                {brand: "IM3", branch: "DUMAI", partner: "SDP CV RIAU INFINITY JAYA SIAK EAST TEBING TINGGI", type: "SDP", np_so: 0, np_amt: 0, p_so: 3, p_amt: 3375000},
+                {brand: "IM3", branch: "DUMAI", partner: "SDP CV RIAU INFINITY JAYA SIAK WEST KANDIS", type: "SDP", np_so: 0, np_amt: 0, p_so: 5, p_amt: 62100000},
+                {brand: "IM3", branch: "DUMAI", partner: "SDP HENDI", type: "SDP", np_so: 1, np_amt: 4925000, p_so: 6, p_amt: 27625000},
+                {brand: "IM3", branch: "JAMBI", partner: "SDP ARDIANSYAH", type: "SDP", np_so: 0, np_amt: 0, p_so: 3, p_amt: 10675000},
+                {brand: "IM3", branch: "JAMBI", partner: "ULTIMA MULTIMEDIA JAYA, PT", type: "MDI", np_so: 22, np_amt: 1570365000, p_so: 36, p_amt: 4851210000},
+                {brand: "IM3", branch: "KAMPAR", partner: "BANGUN HARTA MANDIRI, PT", type: "MDI", np_so: 10, np_amt: 126000000, p_so: 39, p_amt: 651450000},
+                {brand: "IM3", branch: "KAMPAR", partner: "SDP ISRA MIRDA", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 30949740},
+                {brand: "IM3", branch: "KAMPAR", partner: "SDP SINDI", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 8, p_amt: 71567500},
+                {brand: "IM3", branch: "KAMPAR", partner: "SDP YUSTI RANDA WIJAYANTO", type: "SDP", np_so: 2, np_amt: 6925000, p_so: 10, p_amt: 70275000},
+                {brand: "IM3", branch: "PADANG", partner: "SDP AKMAL", type: "SDP", np_so: 3, np_amt: 5690000, p_so: 13, p_amt: 45150000},
+                {brand: "IM3", branch: "PADANG", partner: "SDP DARWANIS", type: "SDP", np_so: 2, np_amt: 1985000, p_so: 10, p_amt: 14775000},
+                {brand: "IM3", branch: "PADANG", partner: "SDP SAHRU ARMADI", type: "SDP", np_so: 5, np_amt: 14775000, p_so: 12, p_amt: 32425000},
+                {brand: "IM3", branch: "PADANG", partner: "ULTIMA MULTIMEDIA JAYA, PT", type: "MDI", np_so: 29, np_amt: 795485000, p_so: 27, p_amt: 512210000},
+                {brand: "IM3", branch: "PEKANBARU", partner: "SDP BATIPUH HILIR", type: "SDP", np_so: 0, np_amt: 0, p_so: 9, p_amt: 80565000},
+                {brand: "IM3", branch: "PEKANBARU", partner: "ULTIMA MULTIMEDIA JAYA, PT", type: "MDI", np_so: 52, np_amt: 1213625000, p_so: 42, p_amt: 2981330000},
+                {brand: "IM3", branch: "SOLOK", partner: "MITRA TELCO INDO CELLULAR", type: "MDI", np_so: 42, np_amt: 611235000, p_so: 27, p_amt: 600685000},
+                {brand: "IM3", branch: "SOLOK", partner: "SDP ALHUSNI MUABARAK", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 20205000},
+                {brand: "IM3", branch: "SOLOK", partner: "SDP FRENDY RICARDO", type: "SDP", np_so: 6, np_amt: 12820000, p_so: 12, p_amt: 27655000},
+                {brand: "IM3", branch: "SOLOK", partner: "SDP SYALVIKA JHONI", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 64470000}
+            ],
+            "16 Oct 2026": [
+                {brand: "3ID", branch: "BATAM", partner: "KIOSK AGUS BINTAN", type: "SDP", np_so: 1, np_amt: 1970000, p_so: 2, p_amt: 1477500},
+                {brand: "3ID", branch: "BATAM", partner: "KIOSK AGUS TANJUNG PINANG", type: "SDP", np_so: 2, np_amt: 591000, p_so: 2, p_amt: 1674500},
+                {brand: "3ID", branch: "BATAM", partner: "KIOSK M ALFANI", type: "SDP", np_so: 1, np_amt: 4925000, p_so: 3, p_amt: 14775000},
+                {brand: "3ID", branch: "BATAM", partner: "PT TRIMINDO JAYA MANDIRI", type: "MDI", np_so: 10, np_amt: 237385000, p_so: 19, p_amt: 486145000},
+                {brand: "3ID", branch: "DUMAI", partner: "KIOSK CV ALMANAR STORE", type: "SDP", np_so: 2, np_amt: 2955000, p_so: 3, p_amt: 5720000},
+                {brand: "3ID", branch: "DUMAI", partner: "KIOSK CV RIAU INFINITY JAYA SIAK WEST KANDIS", type: "SDP", np_so: 0, np_amt: 0, p_so: 4, p_amt: 59100000},
+                {brand: "3ID", branch: "DUMAI", partner: "KIOSK HENDI", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 30625000},
+                {brand: "3ID", branch: "DUMAI", partner: "PT BANGUN HARTA MANDIRI", type: "MDI", np_so: 1, np_amt: 9850000, p_so: 43, p_amt: 471025000},
+                {brand: "3ID", branch: "KAMPAR", partner: "KIOSK ISRA MIRDA", type: "SDP", np_so: 1, np_amt: 5688375, p_so: 5, p_amt: 22261365},
+                {brand: "3ID", branch: "KAMPAR", partner: "KIOSK SINDI", type: "SDP", np_so: 0, np_amt: 0, p_so: 5, p_amt: 15267500},
+                {brand: "3ID", branch: "KAMPAR", partner: "KIOSK YUSTI RANDA WIJAYANTO", type: "SDP", np_so: 1, np_amt: 4925000, p_so: 5, p_amt: 39400000},
+                {brand: "3ID", branch: "KAMPAR", partner: "PT BANGUN HARTA MANDIRI", type: "MDI", np_so: 0, np_amt: 0, p_so: 32, p_amt: 578200000},
+                {brand: "3ID", branch: "PEKANBARU", partner: "KIOSK BATIPUH HILIR", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 73905000},
+                {brand: "3ID", branch: "PEKANBARU", partner: "PT ULTIMA MULTIMEDIA JAYA", type: "MDI", np_so: 8, np_amt: 343765000, p_so: 46, p_amt: 2904840000},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK AHMAD SYUKRON TEBO ILIR", type: "SDP", np_so: 0, np_amt: 0, p_so: 11, p_amt: 49340000},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK AHMAD SYUKRON TEBO RIMBO ULU", type: "SDP", np_so: 0, np_amt: 0, p_so: 9, p_amt: 15962910},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK ARIYANTONI BATANG HARI MERSAM", type: "SDP", np_so: 0, np_amt: 0, p_so: 6, p_amt: 31453125},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK RIO ARIANTO", type: "SDP", np_so: 0, np_amt: 0, p_so: 12, p_amt: 12312500},
+                {brand: "3ID", branch: "BATANGHARI", partner: "KIOSK YULIANTO", type: "SDP", np_so: 0, np_amt: 0, p_so: 6, p_amt: 23640000},
+                {brand: "3ID", branch: "BATANGHARI", partner: "PT ULTIMA MULTIMEDIA JAYA", type: "MDI", np_so: 20, np_amt: 1146540000, p_so: 21, p_amt: 1724655000},
+                {brand: "3ID", branch: "BUNGO", partner: "KIOSK AHMAD SYUKRON MERANGIN TABIR SELATAN", type: "SDP", np_so: 3, np_amt: 15760000, p_so: 12, p_amt: 29847470},
+                {brand: "3ID", branch: "BUNGO", partner: "KIOSK ARIYANTONI MERANGIN PAMENANG", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 23897085},
+                {brand: "3ID", branch: "BUNGO", partner: "KIOSK ARIYANTONI SAROLANGUN SINGKUT", type: "SDP", np_so: 0, np_amt: 0, p_so: 9, p_amt: 22377160},
+                {brand: "3ID", branch: "BUNGO", partner: "PT INDOCEN SYSTEM TELECOMUNICATION", type: "MDI", np_so: 1, np_amt: 68950000, p_so: 45, p_amt: 1051355000},
+                {brand: "3ID", branch: "JAMBI", partner: "KIOSK ARDIANSYAH", type: "SDP", np_so: 0, np_amt: 0, p_so: 1, p_amt: 4925000},
+                {brand: "3ID", branch: "JAMBI", partner: "PT ULTIMA MULTIMEDIA JAYA", type: "MDI", np_so: 19, np_amt: 3092900000, p_so: 25, p_amt: 3389865000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "KIOSK CV ADELIO CELULER", type: "SDP", np_so: 2, np_amt: 4137000, p_so: 16, p_amt: 38570000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "KIOSK CV GADING PERKASA SEJAHTERA", type: "SDP", np_so: 0, np_amt: 0, p_so: 1, p_amt: 985000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "KIOSK M. RIZAL", type: "SDP", np_so: 0, np_amt: 0, p_so: 3, p_amt: 7880000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "KIOSK NANDA SAPUTRA", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 44955000},
+                {brand: "3ID", branch: "BUKITTINGGI", partner: "MITRA TELCO INDO CELLULAR", type: "MDI", np_so: 13, np_amt: 205865000, p_so: 34, p_amt: 419525000},
+                {brand: "3ID", branch: "PADANG", partner: "KIOSK AKMAL", type: "SDP", np_so: 1, np_amt: 3940000, p_so: 10, p_amt: 39400000},
+                {brand: "3ID", branch: "PADANG", partner: "KIOSK DARWANIS", type: "SDP", np_so: 0, np_amt: 0, p_so: 6, p_amt: 9850000},
+                {brand: "3ID", branch: "PADANG", partner: "KIOSK SAHRU ARMADI", type: "SDP", np_so: 7, np_amt: 20685000, p_so: 8, p_amt: 23640000},
+                {brand: "3ID", branch: "PADANG", partner: "PT ULTIMA MULTIMEDIA JAYA", type: "MDI", np_so: 13, np_amt: 394985000, p_so: 19, p_amt: 552410000},
+                {brand: "3ID", branch: "SOLOK", partner: "KIOSK ALHUSNI MUABARAK", type: "SDP", np_so: 0, np_amt: 0, p_so: 5, p_amt: 11205000},
+                {brand: "3ID", branch: "SOLOK", partner: "KIOSK FRENDY RICARDO", type: "SDP", np_so: 6, np_amt: 12805000, p_so: 10, p_amt: 22655000},
+                {brand: "3ID", branch: "SOLOK", partner: "KIOSK SYALVIKA JHONI", type: "SDP", np_so: 0, np_amt: 0, p_so: 3, p_amt: 21670000},
+                {brand: "3ID", branch: "SOLOK", partner: "MITRA TELCO INDO CELLULAR", type: "MDI", np_so: 14, np_amt: 227535000, p_so: 25, p_amt: 547685000},
+
+                // === IM3 ===
+                {brand: "IM3", branch: "BATAM", partner: "SDP AGUS BINTAN", type: "SDP", np_so: 2, np_amt: 3970000, p_so: 2, p_amt: 1477500},
+                {brand: "IM3", branch: "BATAM", partner: "SDP AGUS TANJUNG PINANG", type: "SDP", np_so: 3, np_amt: 2591000, p_so: 2, p_amt: 1674500},
+                {brand: "IM3", branch: "BATAM", partner: "SDP M ALFANI", type: "SDP", np_so: 2, np_amt: 6925000, p_so: 3, p_amt: 14775000},
+                {brand: "IM3", branch: "BATAM", partner: "TRIMINDO JAYA MANDIRI, PT", type: "MDI", np_so: 52, np_amt: 890635000, p_so: 17, p_amt: 513895000},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP AHMAD SYUKRON TEBO ILIR", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 11, p_amt: 49340000},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP AHMAD SYUKRON TEBO RIMBO ULU", type: "SDP", np_so: 1, np_amt: 1000000, p_so: 9, p_amt: 15962910},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP ARIYANTONI BATANG HARI MERSAM", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 6, p_amt: 30453125},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP RIO ARIANTO", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 12, p_amt: 12312500},
+                {brand: "IM3", branch: "BATANGHARI", partner: "SDP YULIANTO", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 26640000},
+                {brand: "IM3", branch: "BATANGHARI", partner: "ULTIMA MULTIMEDIA JAYA, PT", type: "MDI", np_so: 36, np_amt: 1532265000, p_so: 21, p_amt: 1647155000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "MITRA TELCO INDO CELLULAR", type: "MDI", np_so: 41, np_amt: 728390000, p_so: 35, p_amt: 412025000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "SDP CV ADELIO CELULER", type: "SDP", np_so: 2, np_amt: 4137000, p_so: 16, p_amt: 39570000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "SDP CV GADING PERKASA SEJAHTERA", type: "SDP", np_so: 1, np_amt: 1000000, p_so: 2, p_amt: 1735000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "SDP M. RIZAL", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 3, p_amt: 7880000},
+                {brand: "IM3", branch: "BUKITTINGGI", partner: "SDP NANDA SAPUTRA", type: "SDP", np_so: 0, np_amt: 0, p_so: 6, p_amt: 3955000},
+                {brand: "IM3", branch: "BUNGO", partner: "INDOCEN SYSTEM TELECOMUNICATION, PT", type: "MDI", np_so: 21, np_amt: 264650000, p_so: 41, p_amt: 1027355000},
+                {brand: "IM3", branch: "BUNGO", partner: "SDP AHMAD SYUKRON MERANGIN TABIR SELATAN", type: "SDP", np_so: 4, np_amt: 17760000, p_so: 13, p_amt: 55797470},
+                {brand: "IM3", branch: "BUNGO", partner: "SDP ARIYANTONI MERANGIN PAMENANG", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 9, p_amt: 25897085},
+                {brand: "IM3", branch: "BUNGO", partner: "SDP ARIYANTONI SAROLANGUN SINGKUT", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 9, p_amt: 23377160},
+                {brand: "IM3", branch: "DUMAI", partner: "BANGUN HARTA MANDIRI, PT", type: "MDI", np_so: 19, np_amt: 360250000, p_so: 42, p_amt: 354625000},
+                {brand: "IM3", branch: "DUMAI", partner: "SDP ALMANAR STORE", type: "SDP", np_so: 3, np_amt: 3955000, p_so: 2, p_amt: 1970000},
+                {brand: "IM3", branch: "DUMAI", partner: "SDP CV RIAU INFINITY JAYA SIAK EAST TEBING TINGGI", type: "SDP", np_so: 0, np_amt: 0, p_so: 3, p_amt: 3375000},
+                {brand: "IM3", branch: "DUMAI", partner: "SDP CV RIAU INFINITY JAYA SIAK WEST KANDIS", type: "SDP", np_so: 0, np_amt: 0, p_so: 5, p_amt: 62100000},
+                {brand: "IM3", branch: "DUMAI", partner: "SDP HENDI", type: "SDP", np_so: 0, np_amt: 0, p_so: 6, p_amt: 27625000},
+                {brand: "IM3", branch: "JAMBI", partner: "SDP ARDIANSYAH", type: "SDP", np_so: 0, np_amt: 0, p_so: 3, p_amt: 10675000},
+                {brand: "IM3", branch: "JAMBI", partner: "ULTIMA MULTIMEDIA JAYA, PT", type: "MDI", np_so: 38, np_amt: 3795425000, p_so: 24, p_amt: 3314490000},
+                {brand: "IM3", branch: "KAMPAR", partner: "BANGUN HARTA MANDIRI, PT", type: "MDI", np_so: 15, np_amt: 176000000, p_so: 33, p_amt: 568450000},
+                {brand: "IM3", branch: "KAMPAR", partner: "SDP ISRA MIRDA", type: "SDP", np_so: 1, np_amt: 5688375, p_so: 6, p_amt: 24261365},
+                {brand: "IM3", branch: "KAMPAR", partner: "SDP SINDI", type: "SDP", np_so: 1, np_amt: 2000000, p_so: 7, p_amt: 69567500},
+                {brand: "IM3", branch: "KAMPAR", partner: "SDP YUSTI RANDA WIJAYANTO", type: "SDP", np_so: 2, np_amt: 6925000, p_so: 9, p_amt: 63350000},
+                {brand: "IM3", branch: "PADANG", partner: "SDP AKMAL", type: "SDP", np_so: 3, np_amt: 5690000, p_so: 11, p_amt: 40150000},
+                {brand: "IM3", branch: "PADANG", partner: "SDP DARWANIS", type: "SDP", np_so: 2, np_amt: 1375000, p_so: 6, p_amt: 9850000},
+                {brand: "IM3", branch: "PADANG", partner: "SDP SAHRU ARMADI", type: "SDP", np_so: 7, np_amt: 20685000, p_so: 10, p_amt: 26515000},
+                {brand: "IM3", branch: "PADANG", partner: "ULTIMA MULTIMEDIA JAYA, PT", type: "MDI", np_so: 40, np_amt: 1179635000, p_so: 25, p_amt: 483660000},
+                {brand: "IM3", branch: "PEKANBARU", partner: "SDP BATIPUH HILIR", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 74655000},
+                {brand: "IM3", branch: "PEKANBARU", partner: "ULTIMA MULTIMEDIA JAYA, PT", type: "MDI", np_so: 48, np_amt: 1334390000, p_so: 39, p_amt: 2605565000},
+                {brand: "IM3", branch: "SOLOK", partner: "MITRA TELCO INDO CELLULAR", type: "MDI", np_so: 43, np_amt: 615235000, p_so: 25, p_amt: 575685000},
+                {brand: "IM3", branch: "SOLOK", partner: "SDP ALHUSNI MUABARAK", type: "SDP", np_so: 0, np_amt: 0, p_so: 7, p_amt: 15205000},
+                {brand: "IM3", branch: "SOLOK", partner: "SDP FRENDY RICARDO", type: "SDP", np_so: 8, np_amt: 21305000, p_so: 10, p_amt: 22655000},
+                {brand: "IM3", branch: "SOLOK", partner: "SDP SYALVIKA JHONI", type: "SDP", np_so: 0, np_amt: 0, p_so: 8, p_amt: 64470000}
+            ]
+        };
+
+        let mdiChart, sdpChart;
+
+        function init() {
+            populateDateFilter();
+            populateBranchFilter();
+            initCharts();
+            updateDashboard();
+        }
+
+        function populateDateFilter() {
+            const dateSelect = document.getElementById("filterDate");
+            dateSelect.innerHTML = "";
+            const dates = Object.keys(allData);
+            dates.forEach(d => {
+                const opt = document.createElement("option");
+                opt.value = d;
+                opt.textContent = d;
+                opt.className = "bg-slate-800 text-slate-100 font-semibold py-1";
+                dateSelect.appendChild(opt);
+            });
+            dateSelect.value = dates[0];
+        }
+
+        function populateBranchFilter() {
+            const selectedDate = document.getElementById("filterDate").value || Object.keys(allData)[0];
+            const currentData = allData[selectedDate] || [];
+            const branches = [...new Set(currentData.map(item => item.branch))].sort();
+            const select = document.getElementById("filterBranch");
+            const currentSelectedBranch = select.value || "ALL";
+            
+            select.innerHTML = '<option value="ALL">Semua Cabang</option>';
+            branches.forEach(b => {
+                const opt = document.createElement("option");
+                opt.value = b;
+                opt.textContent = b;
+                select.appendChild(opt);
+            });
+            if (branches.includes(currentSelectedBranch)) {
+                select.value = currentSelectedBranch;
+            }
+        }
+
+        function formatRupiah(num) {
+            return "Rp " + num.toLocaleString("id-ID");
+        }
+
+        function formatShortRupiah(num) {
+            if (num >= 1e9) {
+                return "Rp " + (num / 1e9).toFixed(2) + "M";
+            } else if (num >= 1e6) {
+                return "Rp " + (num / 1e6).toFixed(0) + "Jt";
+            }
+            return "Rp " + num.toLocaleString("id-ID");
+        }
+
+        function updateDashboard() {
+            const selectedDate = document.getElementById("filterDate").value || Object.keys(allData)[0];
+            const currentData = allData[selectedDate] || [];
+
+            populateBranchFilter();
+
+            const fBrand = document.getElementById("filterBrand").value;
+            const fBranch = document.getElementById("filterBranch").value;
+            const fSearch = document.getElementById("filterSearch").value.toLowerCase();
+
+            const filtered = currentData.filter(d => {
+                const matchBrand = (fBrand === "ALL" || d.brand === fBrand);
+                const matchBranch = (fBranch === "ALL" || d.branch === fBranch);
+                const matchSearch = d.partner.toLowerCase().includes(fSearch) || d.branch.toLowerCase().includes(fSearch);
+                return matchBrand && matchBranch && matchSearch;
+            });
+
+            let totalNP_SO = 0, totalNP_Amt = 0, totalP_SO = 0, totalP_Amt = 0;
+            filtered.forEach(d => {
+                totalNP_SO += d.np_so;
+                totalNP_Amt += d.np_amt;
+                totalP_SO += d.p_so;
+                totalP_Amt += d.p_amt;
+            });
+
+            const totalSO = totalNP_SO + totalP_SO;
+            const totalAmt = totalNP_Amt + totalP_Amt;
+
+            document.getElementById("kpiTotalSO").textContent = totalSO.toLocaleString("id-ID");
+            document.getElementById("kpiNotPaidSO").textContent = totalNP_SO.toLocaleString("id-ID");
+            document.getElementById("kpiPaidSO").textContent = totalP_SO.toLocaleString("id-ID");
+
+            document.getElementById("kpiTotalAmount").textContent = formatRupiah(totalAmt);
+            document.getElementById("kpiNotPaidAmt").textContent = formatRupiah(totalNP_Amt);
+            document.getElementById("kpiPaidAmt").textContent = formatRupiah(totalP_Amt);
+
+            document.getElementById("kpiNotPaidPct").textContent = totalAmt > 0 ? ((totalNP_Amt / totalAmt) * 100).toFixed(1) + "% dari total nominal" : "0%";
+            document.getElementById("kpiPaidPct").textContent = totalAmt > 0 ? ((totalP_Amt / totalAmt) * 100).toFixed(1) + "% dari total nominal" : "0%";
+
+            const tbody = document.getElementById("tableBody");
+            tbody.innerHTML = "";
+            filtered.forEach(d => {
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-700/50 transition border-b border-slate-700/60";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-bold border-r border-slate-800 ${d.brand==='3ID'?'text-magenta-400':'text-brandOrange-400'}">
+                        <span class="px-2 py-0.5 rounded text-xs ${d.brand==='3ID'?'bg-magenta-500/20 text-magenta-300 border border-magenta-500/30':'bg-brandOrange-500/20 text-brandOrange-300 border border-brandOrange-500/30'}">${d.brand}</span>
+                    </td>
+                    <td class="py-3 px-4 text-slate-200 font-medium border-r border-slate-800">${d.partner}</td>
+                    <td class="py-3 px-4 border-r border-slate-800"><span class="text-xs px-2 py-0.5 rounded font-bold ${d.type==='MDI'?'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30':'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'}">${d.type}</span></td>
+                    <td class="py-3 px-4 text-center font-bold text-magenta-400 bg-magenta-950/20 border-r border-slate-800">${d.np_so}</td>
+                    <td class="py-3 px-4 text-right font-medium text-magenta-400 bg-magenta-950/20 border-r border-slate-800">${formatRupiah(d.np_amt)}</td>
+                    <td class="py-3 px-4 text-center font-bold text-brandOrange-400 bg-brandOrange-950/20 border-r border-slate-800">${d.p_so}</td>
+                    <td class="py-3 px-4 text-right font-medium text-brandOrange-400 bg-brandOrange-950/20">${formatRupiah(d.p_amt)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById("footNP_SO").textContent = totalNP_SO.toLocaleString("id-ID");
+            document.getElementById("footNP_Amt").textContent = formatRupiah(totalNP_Amt);
+            document.getElementById("footP_SO").textContent = totalP_SO.toLocaleString("id-ID");
+            document.getElementById("footP_Amt").textContent = formatRupiah(totalP_Amt);
+
+            document.getElementById("recordCount").textContent = filtered.length + " Data";
+
+            updateCharts(filtered, fBranch);
+        }
+
+        function initCharts() {
+            const createChartConfig = () => ({
+                type: 'bar',
+                data: { labels: [], datasets: [] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { labels: { color: '#cbd5e1' } },
+                        datalabels: {
+                            anchor: 'center',
+                            align: 'center',
+                            color: '#ffffff',
+                            font: { weight: 'bold', size: 12 },
+                            textAlign: 'center',
+                            formatter: function(value, context) {
+                                if (value === 0) return '';
+                                const dataIndex = context.dataIndex;
+                                const chart = context.chart;
+                                const npVal = chart.data.datasets[0].data[dataIndex] || 0;
+                                const pVal = chart.data.datasets[1].data[dataIndex] || 0;
+                                const total = npVal + pVal;
+
+                                const pct = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '';
+                                const formattedVal = formatShortRupiah(value);
+                                return `${formattedVal}\n(${pct})`;
+                            },
+                            display: function(context) {
+                                return context.dataset.data[context.dataIndex] > 0;
+                            }
+                        }
+                    },
+                    scales: { 
+                        x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+                        y: { beginAtZero: true, ticks: { color: '#94a3b8', callback: v => "Rp " + (v/1e6).toFixed(0) + "Jt" }, grid: { color: '#334155' } } 
+                    }
+                }
+            });
+
+            const ctxMdi = document.getElementById("mdiChart").getContext("2d");
+            mdiChart = new Chart(ctxMdi, createChartConfig());
+
+            const ctxSdp = document.getElementById("sdpChart").getContext("2d");
+            sdpChart = new Chart(ctxSdp, createChartConfig());
+        }
+
+        function updateCharts(data, selectedBranch) {
+            if (selectedBranch === "ALL") {
+                const mdiFiltered = data.filter(d => d.type === 'MDI');
+                const mdiNP = mdiFiltered.reduce((a, b) => a + b.np_amt, 0);
+                const mdiP = mdiFiltered.reduce((a, b) => a + b.p_amt, 0);
+
+                mdiChart.data.labels = ["Semua Cabang"];
+                mdiChart.data.datasets = [
+                    { label: 'Not Paid', data: [mdiNP], backgroundColor: '#ec4899', borderRadius: 6 },
+                    { label: 'Paid', data: [mdiP], backgroundColor: '#f97316', borderRadius: 6 }
+                ];
+                mdiChart.update();
+
+                const sdpFiltered = data.filter(d => d.type === 'SDP');
+                const sdpNP = sdpFiltered.reduce((a, b) => a + b.np_amt, 0);
+                const sdpP = sdpFiltered.reduce((a, b) => a + b.p_amt, 0);
+
+                sdpChart.data.labels = ["Semua Cabang"];
+                sdpChart.data.datasets = [
+                    { label: 'Not Paid', data: [sdpNP], backgroundColor: '#ec4899', borderRadius: 6 },
+                    { label: 'Paid', data: [sdpP], backgroundColor: '#f97316', borderRadius: 6 }
+                ];
+                sdpChart.update();
+            } else {
+                const mdiMap = {};
+                data.filter(d => d.type === 'MDI').forEach(d => {
+                    if (!mdiMap[d.branch]) mdiMap[d.branch] = { np: 0, p: 0 };
+                    mdiMap[d.branch].np += d.np_amt;
+                    mdiMap[d.branch].p += d.p_amt;
+                });
+
+                const mdiBranches = Object.keys(mdiMap);
+                mdiChart.data.labels = mdiBranches;
+                mdiChart.data.datasets = [
+                    { label: 'Not Paid', data: mdiBranches.map(b => mdiMap[b].np), backgroundColor: '#ec4899', borderRadius: 6 },
+                    { label: 'Paid', data: mdiBranches.map(b => mdiMap[b].p), backgroundColor: '#f97316', borderRadius: 6 }
+                ];
+                mdiChart.update();
+
+                const sdpMap = {};
+                data.filter(d => d.type === 'SDP').forEach(d => {
+                    if (!sdpMap[d.branch]) sdpMap[d.branch] = { np: 0, p: 0 };
+                    sdpMap[d.branch].np += d.np_amt;
+                    sdpMap[d.branch].p += d.p_amt;
+                });
+
+                const sdpBranches = Object.keys(sdpMap);
+                sdpChart.data.labels = sdpBranches;
+                sdpChart.data.datasets = [
+                    { label: 'Not Paid', data: sdpBranches.map(b => sdpMap[b].np), backgroundColor: '#ec4899', borderRadius: 6 },
+                    { label: 'Paid', data: sdpBranches.map(b => sdpMap[b].p), backgroundColor: '#f97316', borderRadius: 6 }
+                ];
+                sdpChart.update();
+            }
+        }
+
+        function downloadSummaryImage() {
+            const fBrand = document.getElementById("filterBrand").value;
+            const fBranch = document.getElementById("filterBranch").value;
+            const fSearch = document.getElementById("filterSearch").value.trim();
+            const fDate = document.getElementById("filterDate").value || "21_Oct_2026";
+
+            let fileParts = ["Summary_PO"];
+
+            if (fBrand !== "ALL") fileParts.push(fBrand);
+            if (fBranch !== "ALL") fileParts.push(fBranch);
+            
+            if (fSearch !== "") {
+                const cleanSearch = fSearch.replace(/[^a-zA-Z0-9]/g, "_");
+                fileParts.push(cleanSearch);
+            }
+
+            fileParts.push(fDate.replace(/\s+/g, "_"));
+
+            const dynamicFileName = fileParts.join("_") + ".png";
+
+            const exportElement = document.getElementById("exportArea");
+            html2canvas(exportElement, {
+                backgroundColor: "#0f172a",
+                scale: 2
+            }).then(canvas => {
+                const link = document.createElement("a");
+                link.download = dynamicFileName;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        }
+
+        function resetFilters() {
+            document.getElementById("filterBrand").value = "ALL";
+            document.getElementById("filterBranch").value = "ALL";
+            document.getElementById("filterSearch").value = "";
+            document.getElementById("filterDate").selectedIndex = 0;
+            updateDashboard();
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
